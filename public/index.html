@@ -269,18 +269,18 @@ audio{width:100%;border-radius:var(--radius-sm)}
       </summary>
       <div style="padding:12px 0">
         <div class="form-group" style="margin-bottom:12px">
-          <label>Voice ID personalizat (ElevenLabs)</label>
-          <input type="text" id="customVoiceId" placeholder="Ex: EXAVITQu4vr4xnSDxMaL (lasă gol pentru vocea implicită)">
+          <label>Voice ID personalizat</label>
+          <input type="text" id="customVoiceId" placeholder="Ex: Bawt8oEycTxqH0gysIwO (lasă gol pentru vocea implicită)">
           <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:4px">
-            Pentru voce clonată: copiază Voice ID din ElevenLabs Dashboard → Voices
+            Pentru voce personalizată: copiază Voice ID din panoul de administrare
           </div>
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label>Model ElevenLabs</label>
+          <label>Model voce</label>
           <select id="modelSelect">
-            <option value="eleven_multilingual_v2">Multilingual v2 (recomandat — calitate maximă)</option>
-            <option value="eleven_flash_v2_5">Flash v2.5 (rapid, calitate bună)</option>
-            <option value="eleven_v3">Eleven v3 (preview — expresivitate maximă)</option>
+            <option value="eleven_multilingual_v2">Standard (recomandat — calitate maximă)</option>
+            <option value="eleven_flash_v2_5">Rapid (calitate bună, mai rapid)</option>
+            <option value="eleven_v3">Expresiv (preview — expresivitate maximă)</option>
           </select>
         </div>
       </div>
@@ -306,8 +306,8 @@ audio{width:100%;border-radius:var(--radius-sm)}
     <div class="progress-detail" id="progressDetail"></div>
 
     <div class="progress-steps-list">
-      <div class="step-item" id="stepScript"><div class="step-dot"></div>Generare script (Claude AI)</div>
-      <div class="step-item" id="stepTTS"><div class="step-dot"></div>Sinteză vocală (ElevenLabs)</div>
+      <div class="step-item" id="stepScript"><div class="step-dot"></div>Creare script meditație</div>
+      <div class="step-item" id="stepTTS"><div class="step-dot"></div>Sinteză vocală</div>
       <div class="step-item" id="stepMusic"><div class="step-dot"></div>Mixare muzică</div>
       <div class="step-item" id="stepAssembly"><div class="step-dot"></div>Asamblare finală</div>
     </div>
