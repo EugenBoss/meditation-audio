@@ -218,18 +218,20 @@ audio{width:100%;border-radius:var(--radius-sm)}
       <div>
         <label>Durată</label>
         <div class="toggle-group" id="durationToggle">
-          <button class="toggle-btn" data-val="short">5 min</button>
-          <button class="toggle-btn active" data-val="medium">10 min</button>
+          <button class="toggle-btn" data-val="short">7 min</button>
+          <button class="toggle-btn active" data-val="medium">12 min</button>
           <button class="toggle-btn" data-val="long">20 min</button>
-          <button class="toggle-btn" data-val="extended">30 min</button>
         </div>
       </div>
       <div>
-        <label>Ambient</label>
+        <label>Muzică</label>
         <div class="toggle-group" id="ambientToggle">
           <button class="toggle-btn active" data-val="ocean">🌊 Ocean</button>
           <button class="toggle-btn" data-val="nature">🌿 Natură</button>
+          <button class="toggle-btn" data-val="piano">🎹 Piano</button>
+          <button class="toggle-btn" data-val="bowls">🔔 Bowls</button>
           <button class="toggle-btn" data-val="rain">🌧️ Ploaie</button>
+          <button class="toggle-btn" data-val="hz432">🔊 432Hz</button>
           <button class="toggle-btn" data-val="none">🔇 Fără</button>
         </div>
       </div>
@@ -306,7 +308,7 @@ audio{width:100%;border-radius:var(--radius-sm)}
     <div class="progress-steps-list">
       <div class="step-item" id="stepScript"><div class="step-dot"></div>Generare script (Claude AI)</div>
       <div class="step-item" id="stepTTS"><div class="step-dot"></div>Sinteză vocală (ElevenLabs)</div>
-      <div class="step-item" id="stepAmbient"><div class="step-dot"></div>Track ambient</div>
+      <div class="step-item" id="stepMusic"><div class="step-dot"></div>Mixare muzică</div>
       <div class="step-item" id="stepAssembly"><div class="step-dot"></div>Asamblare finală</div>
     </div>
   </div>
@@ -415,6 +417,7 @@ async function startGeneration() {
   }
 
   hideError();
+  try { localStorage.removeItem('lastMeditationResult'); } catch {}
   document.getElementById('formCard').style.display = 'none';
   document.getElementById('resultCard').classList.remove('visible');
   document.getElementById('scriptOnlyCard').classList.remove('visible');
@@ -473,7 +476,7 @@ function updateProgress(job) {
   const stepMap = {
     script: { label: 'Se generează scriptul...', pct: 10, active: 'stepScript' },
     tts: { label: `Sinteză vocală: ${job.progress}/${job.total}`, pct: 15 + (job.progress / Math.max(job.total, 1)) * 65, active: 'stepTTS' },
-    ambient: { label: 'Se generează track-ul ambient...', pct: 82, active: 'stepAmbient' },
+    music: { label: 'Se mixează muzica...', pct: 82, active: 'stepMusic' },
     assembly: { label: 'Se asamblează audio-ul final...', pct: 90, active: 'stepAssembly' },
     cleanup: { label: 'Finalizare...', pct: 95, active: 'stepAssembly' },
     done: { label: 'Gata!', pct: 100, active: null }
@@ -486,7 +489,7 @@ function updateProgress(job) {
   document.getElementById('progressDetail').textContent = job.currentText || '';
 
   // Update step indicators
-  const allSteps = ['stepScript', 'stepTTS', 'stepAmbient', 'stepAssembly'];
+  const allSteps = ['stepScript', 'stepTTS', 'stepMusic', 'stepAssembly'];
   const activeIdx = allSteps.indexOf(step.active);
 
   allSteps.forEach((s, i) => {
@@ -501,7 +504,7 @@ function resetProgress() {
   document.getElementById('progressBar').style.width = '0%';
   document.getElementById('progressStep').textContent = 'Se pornește...';
   document.getElementById('progressDetail').textContent = '';
-  ['stepScript', 'stepTTS', 'stepAmbient', 'stepAssembly'].forEach(s => {
+  ['stepScript', 'stepTTS', 'stepMusic', 'stepAssembly'].forEach(s => {
     document.getElementById(s).classList.remove('active', 'done');
   });
 }
@@ -525,9 +528,34 @@ function showResult(result) {
   dlBtn.href = result.download_url;
   dlBtn.download = result.filename || 'meditatie.mp3';
 
-  // Load script for preview
-  loadScript();
+  // Persist result so it survives page refresh
+  try {
+    localStorage.setItem('lastMeditationResult', JSON.stringify(result));
+  } catch { /* ignore */ }
 }
+
+// On page load: restore last result if available
+(function restoreLastResult() {
+  try {
+    const saved = localStorage.getItem('lastMeditationResult');
+    if (!saved) return;
+    const result = JSON.parse(saved);
+    if (!result.download_url) return;
+
+    document.getElementById('formCard').style.display = 'none';
+    document.getElementById('resultCard').classList.add('visible');
+    document.getElementById('resultTitle').textContent = '🧘 ' + (result.script_title || 'Ultima meditație generată');
+    document.getElementById('statDuration').textContent = result.duration_minutes || '—';
+    document.getElementById('statSize').textContent = result.size_mb || '—';
+
+    const audioEl = document.getElementById('audioPlayer');
+    audioEl.src = result.download_url;
+
+    const dlBtn = document.getElementById('downloadBtn');
+    dlBtn.href = result.download_url;
+    dlBtn.download = result.filename || 'meditatie.mp3';
+  } catch { /* ignore */ }
+})();
 
 async function loadScript() {
   try {
@@ -642,6 +670,7 @@ function resetForm() {
   if (pollInterval) clearInterval(pollInterval);
   currentJobId = null;
   lastScript = null;
+  try { localStorage.removeItem('lastMeditationResult'); } catch {}
 
   document.getElementById('formCard').style.display = 'block';
   document.getElementById('progressCard').classList.remove('visible');

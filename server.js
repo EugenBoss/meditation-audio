@@ -12,7 +12,7 @@ import crypto from 'crypto';
 import { generateScript } from './lib/script-generator.js';
 import { processScript } from './lib/tts-engine.js';
 import { assembleAudio, generateAmbientTrack } from './lib/audio-assembler.js';
-import { RECOMMENDED_VOICES, DURATION_TEMPLATES } from './lib/meditation-prompts.js';
+import { RECOMMENDED_VOICES, DURATION_TEMPLATES, MUSIC_TRACKS } from './lib/meditation-prompts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -152,6 +152,14 @@ app.get('/api/voices', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════
+// API: Available music tracks
+// ═══════════════════════════════════════════════════════
+
+app.get('/api/music', (req, res) => {
+  res.json(MUSIC_TRACKS);
+});
+
+// ═══════════════════════════════════════════════════════
 // PIPELINE
 // ═══════════════════════════════════════════════════════
 
@@ -197,16 +205,36 @@ async function runPipeline(jobId) {
     }
   });
 
-  // ── Step 3: Generate ambient track (optional) ────────
-  let ambientPath = null;
+  // ── Step 3: Music track (from Audiio library or generated fallback) ──
+  let musicPath = null;
+  let musicVolume = 0.08;
   if (ambient && ambient !== 'none') {
-    job.step = 'ambient';
-    console.log(`[Pipeline ${jobId}] Step 3: Generating ambient track (${ambient})...`);
+    job.step = 'music';
 
-    // Estimate total duration from segments + pauses
-    const estimatedDuration = totalSegments * 8; // rough: 8 sec avg per segment+pause
-    ambientPath = path.join(workDir, 'ambient.mp3');
-    await generateAmbientTrack(estimatedDuration + 30, ambientPath, ambient);
+    const musicTrack = MUSIC_TRACKS[ambient];
+
+    if (musicTrack && musicTrack.file) {
+      // Real music file from Audiio library (stored on server)
+      const realMusicPath = path.join(__dirname, musicTrack.file);
+      try {
+        await fs.access(realMusicPath);
+        musicPath = realMusicPath;
+        musicVolume = musicTrack.volume || 0.08;
+        console.log(`[Pipeline ${jobId}] Step 3: Using music track "${ambient}" (vol: ${musicVolume})`);
+      } catch {
+        // File not found — fall back to generated ambient
+        console.log(`[Pipeline ${jobId}] Step 3: Music file "${musicTrack.file}" not found, generating fallback...`);
+        const estimatedDuration = totalSegments * 8;
+        musicPath = path.join(workDir, 'ambient_fallback.mp3');
+        await generateAmbientTrack(estimatedDuration + 30, musicPath, ambient);
+      }
+    } else {
+      // No file configured — generate procedural ambient
+      console.log(`[Pipeline ${jobId}] Step 3: Generating ambient track (${ambient})...`);
+      const estimatedDuration = totalSegments * 8;
+      musicPath = path.join(workDir, 'ambient_generated.mp3');
+      await generateAmbientTrack(estimatedDuration + 30, musicPath, ambient);
+    }
   }
 
   // ── Step 4: Assemble final audio ─────────────────────
@@ -219,8 +247,8 @@ async function runPipeline(jobId) {
   const outputPath = path.join(workDir, filename);
 
   const result = await assembleAudio(audioFiles, outputPath, {
-    backgroundAudio: ambientPath,
-    backgroundVolume: 0.08,
+    backgroundAudio: musicPath,
+    backgroundVolume: musicVolume,
     normalize: true,
     fadeInSec: 2,
     fadeOutSec: 4
@@ -231,8 +259,9 @@ async function runPipeline(jobId) {
   for (const f of audioFiles) {
     try { await fs.unlink(f); } catch { /* ignore */ }
   }
-  if (ambientPath) {
-    try { await fs.unlink(ambientPath); } catch { /* ignore */ }
+  // Only delete generated ambient files, not real music tracks
+  if (musicPath && musicPath.includes(workDir)) {
+    try { await fs.unlink(musicPath); } catch { /* ignore */ }
   }
 
   // ── Done ─────────────────────────────────────────────
