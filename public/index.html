@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator Meditații Audio — Puterea Minții</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg-deep:#0f1f28;--bg-card:#1e3645;--bg-input:#162a36;
+  --accent-blue:#4FC1E9;--accent-gold:#F6D44C;--accent-teal:#3B596A;
+  --accent-green:#2ecc71;--accent-red:#9B3A4D;
+  --text-primary:#e8ecef;--text-secondary:#8fa3b0;--text-heading:#ffffff;
+  --border:#2a4a5a;--radius:14px;--radius-sm:10px;
+}
+body{
+  font-family:'DM Sans',sans-serif;background:linear-gradient(145deg,var(--bg-deep),#1a3040);
+  color:var(--text-primary);min-height:100vh;line-height:1.6;
+}
+.container{max-width:680px;margin:0 auto;padding:20px 16px}
+
+/* Header */
+.header{text-align:center;padding:32px 0 24px}
+.header-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent-blue),var(--accent-teal));
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+  font-size:28px;box-shadow:0 4px 24px rgba(79,193,233,0.25);
+}
+.header h1{
+  font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:600;
+  color:var(--text-heading);margin-bottom:4px;
+}
+.header p{font-size:0.85rem;color:var(--text-secondary)}
+
+/* Card */
+.card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;margin-bottom:16px;
+}
+.card-title{
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;
+  color:var(--accent-blue);margin-bottom:16px;
+}
+
+/* Form elements */
+label{display:block;font-size:0.82rem;color:var(--text-secondary);margin-bottom:6px;font-weight:500}
+textarea,input[type="text"],select{
+  width:100%;padding:12px 14px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--bg-input);color:var(--text-primary);
+  font-family:'DM Sans',sans-serif;font-size:0.92rem;
+  transition:border-color 0.2s;outline:none;
+}
+textarea:focus,input:focus,select:focus{border-color:var(--accent-blue)}
+textarea{resize:vertical;min-height:100px}
+select{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238fa3b0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
+}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.form-group{margin-bottom:16px}
+
+/* Toggle buttons */
+.toggle-group{display:flex;gap:6px;flex-wrap:wrap}
+.toggle-btn{
+  padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+  background:var(--bg-input);color:var(--text-secondary);cursor:pointer;
+  font-size:0.82rem;font-weight:500;transition:all 0.2s;
+}
+.toggle-btn:hover{border-color:var(--accent-blue)}
+.toggle-btn.active{
+  background:rgba(79,193,233,0.15);border-color:var(--accent-blue);color:var(--accent-blue);
+}
+
+/* Main button */
+.btn-primary{
+  width:100%;padding:16px;border:none;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--accent-gold),#e6c43c);
+  color:#1a1a1a;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;
+  cursor:pointer;transition:all 0.25s;letter-spacing:0.3px;
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(246,212,76,0.3)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+.btn-secondary{
+  width:100%;padding:12px;border:1px solid var(--accent-blue);border-radius:var(--radius-sm);
+  background:transparent;color:var(--accent-blue);font-family:'DM Sans',sans-serif;
+  font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:8px;
+}
+.btn-secondary:hover{background:rgba(79,193,233,0.1)}
+
+/* Progress */
+.progress-card{display:none}
+.progress-card.visible{display:block}
+.progress-bar-wrap{
+  height:6px;background:var(--bg-input);border-radius:3px;overflow:hidden;margin:12px 0;
+}
+.progress-bar{height:100%;background:var(--accent-blue);border-radius:3px;transition:width 0.5s ease}
+.progress-step{
+  font-size:0.85rem;color:var(--accent-blue);font-weight:600;margin-bottom:8px;
+}
+.progress-detail{font-size:0.8rem;color:var(--text-secondary);font-style:italic}
+.progress-steps-list{margin-top:16px}
+.step-item{
+  display:flex;align-items:center;gap:10px;padding:8px 0;
+  font-size:0.82rem;color:var(--text-secondary);
+}
+.step-item.active{color:var(--accent-blue);font-weight:600}
+.step-item.done{color:var(--accent-green)}
+.step-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;
+}
+.step-item.active .step-dot{background:var(--accent-blue);box-shadow:0 0 8px rgba(79,193,233,0.5)}
+.step-item.done .step-dot{background:var(--accent-green)}
+
+/* Result */
+.result-card{display:none}
+.result-card.visible{display:block}
+.result-title{
+  font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;
+  color:var(--accent-gold);text-align:center;margin-bottom:16px;
+}
+.result-stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;
+}
+.stat-box{
+  text-align:center;padding:12px 8px;background:var(--bg-input);
+  border-radius:var(--radius-sm);border:1px solid var(--border);
+}
+.stat-value{font-size:1.2rem;font-weight:700;color:var(--accent-blue)}
+.stat-label{font-size:0.72rem;color:var(--text-secondary);margin-top:2px}
+
+.audio-player{
+  width:100%;margin:16px 0;border-radius:var(--radius-sm);
+}
+audio{width:100%;border-radius:var(--radius-sm)}
+
+.download-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:16px;border:none;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--accent-green),#27ae60);
+  color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;
+  cursor:pointer;transition:all 0.25s;text-decoration:none;
+}
+.download-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,204,113,0.3)}
+
+/* Script preview */
+.script-preview{
+  max-height:300px;overflow-y:auto;padding:16px;background:var(--bg-input);
+  border-radius:var(--radius-sm);border:1px solid var(--border);margin-top:16px;
+  font-size:0.8rem;line-height:1.7;
+}
+.script-phase{
+  font-weight:700;color:var(--accent-blue);text-transform:uppercase;
+  font-size:0.72rem;letter-spacing:1px;margin:16px 0 8px;
+}
+.script-phase:first-child{margin-top:0}
+.script-segment{color:var(--text-primary);margin-bottom:4px}
+.script-pause{color:var(--text-secondary);font-style:italic;font-size:0.72rem}
+
+/* Error */
+.error-msg{
+  padding:12px 16px;background:rgba(155,58,77,0.15);border:1px solid var(--accent-red);
+  border-radius:var(--radius-sm);color:#e74c6f;font-size:0.85rem;margin-top:12px;display:none;
+}
+.error-msg.visible{display:block}
+
+/* Animations */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.pulsing{animation:pulse 1.5s ease infinite}
+
+@media(max-width:500px){
+  .form-row{grid-template-columns:1fr}
+  .result-stats{grid-template-columns:1fr 1fr}
+  .container{padding:12px}
+  .header h1{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">🧘</div>
+    <h1>Generator Meditații Audio</h1>
+    <p>Meditații ghidate profesionale • Puterea Minții</p>
+  </div>
+
+  <!-- Input Form -->
+  <div class="card" id="formCard">
+    <div class="card-title">Ce meditație vrei să creezi?</div>
+
+    <div class="form-group">
+      <label>Tema / Problema terapeutică *</label>
+      <textarea id="problem" placeholder="Ex: Anxietate și atacuri de panică nocturnă&#10;Ex: Încredere în sine și curaj&#10;Ex: Somn profund și liniștit"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Limbă</label>
+        <div class="toggle-group" id="langToggle">
+          <button class="toggle-btn active" data-val="ro">🇷🇴 Română</button>
+          <button class="toggle-btn" data-val="en">🇬🇧 English</button>
+        </div>
+      </div>
+      <div>
+        <label>Voce</label>
+        <div class="toggle-group" id="genderToggle">
+          <button class="toggle-btn active" data-val="female">♀ Feminină</button>
+          <button class="toggle-btn" data-val="male">♂ Masculină</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Durată</label>
+        <div class="toggle-group" id="durationToggle">
+          <button class="toggle-btn" data-val="short">5 min</button>
+          <button class="toggle-btn active" data-val="medium">10 min</button>
+          <button class="toggle-btn" data-val="long">20 min</button>
+          <button class="toggle-btn" data-val="extended">30 min</button>
+        </div>
+      </div>
+      <div>
+        <label>Ambient</label>
+        <div class="toggle-group" id="ambientToggle">
+          <button class="toggle-btn active" data-val="ocean">🌊 Ocean</button>
+          <button class="toggle-btn" data-val="nature">🌿 Natură</button>
+          <button class="toggle-btn" data-val="rain">🌧️ Ploaie</button>
+          <button class="toggle-btn" data-val="none">🔇 Fără</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Prenume (opțional)</label>
+        <input type="text" id="userName" placeholder="Ex: Maria">
+      </div>
+      <div>
+        <label>Categorie</label>
+        <select id="category">
+          <option value="">Auto-detect</option>
+          <option value="anxietate">Anxietate și frici</option>
+          <option value="stima_de_sine">Stimă de sine</option>
+          <option value="somn">Somn și relaxare</option>
+          <option value="trauma">Traumă și copil interior</option>
+          <option value="depresie">Depresie și tristețe</option>
+          <option value="burnout">Burnout și epuizare</option>
+          <option value="motivatie">Motivație și energie</option>
+          <option value="relatii">Relații și atașament</option>
+          <option value="dependente">Dependențe</option>
+          <option value="bani">Relație cu banii</option>
+          <option value="sanatate">Sănătate fizică</option>
+          <option value="vindecare">Vindecare generală</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Advanced -->
+    <details style="margin-bottom:16px">
+      <summary style="cursor:pointer;font-size:0.82rem;color:var(--text-secondary);font-weight:500;padding:8px 0">
+        ⚙️ Setări avansate
+      </summary>
+      <div style="padding:12px 0">
+        <div class="form-group" style="margin-bottom:12px">
+          <label>Voice ID personalizat (ElevenLabs)</label>
+          <input type="text" id="customVoiceId" placeholder="Ex: EXAVITQu4vr4xnSDxMaL (lasă gol pentru vocea implicită)">
+          <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:4px">
+            Pentru voce clonată: copiază Voice ID din ElevenLabs Dashboard → Voices
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Model ElevenLabs</label>
+          <select id="modelSelect">
+            <option value="eleven_multilingual_v2">Multilingual v2 (recomandat — calitate maximă)</option>
+            <option value="eleven_flash_v2_5">Flash v2.5 (rapid, calitate bună)</option>
+            <option value="eleven_v3">Eleven v3 (preview — expresivitate maximă)</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <button class="btn-primary" id="generateBtn" onclick="startGeneration()">
+      ✨ Generează Meditație Audio
+    </button>
+
+    <button class="btn-secondary" id="previewBtn" onclick="previewScript()">
+      📝 Previzualizează doar scriptul
+    </button>
+
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="card progress-card" id="progressCard">
+    <div class="progress-step" id="progressStep">Se generează scriptul...</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="progress-detail" id="progressDetail"></div>
+
+    <div class="progress-steps-list">
+      <div class="step-item" id="stepScript"><div class="step-dot"></div>Generare script (Claude AI)</div>
+      <div class="step-item" id="stepTTS"><div class="step-dot"></div>Sinteză vocală (ElevenLabs)</div>
+      <div class="step-item" id="stepAmbient"><div class="step-dot"></div>Track ambient</div>
+      <div class="step-item" id="stepAssembly"><div class="step-dot"></div>Asamblare finală</div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="card result-card" id="resultCard">
+    <div class="result-title" id="resultTitle">✅ Meditație generată!</div>
+
+    <div class="result-stats">
+      <div class="stat-box">
+        <div class="stat-value" id="statDuration">—</div>
+        <div class="stat-label">minute</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="statSize">—</div>
+        <div class="stat-label">MB</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="statSegments">—</div>
+        <div class="stat-label">segmente</div>
+      </div>
+    </div>
+
+    <div class="audio-player">
+      <audio controls id="audioPlayer"></audio>
+    </div>
+
+    <a class="download-btn" id="downloadBtn" href="#" download>
+      ⬇ Descarcă MP3
+    </a>
+
+    <button class="btn-secondary" onclick="showScriptPreview()" style="margin-top:12px">
+      📝 Vezi scriptul complet
+    </button>
+    <div class="script-preview" id="scriptPreview" style="display:none"></div>
+
+    <button class="btn-secondary" onclick="resetForm()" style="margin-top:8px">
+      🔄 Generează altă meditație
+    </button>
+  </div>
+
+  <!-- Script Preview (standalone) -->
+  <div class="card result-card" id="scriptOnlyCard">
+    <div class="result-title">📝 Script generat</div>
+    <div class="script-preview" id="scriptOnlyPreview" style="display:block;max-height:500px"></div>
+    <button class="btn-primary" onclick="generateFromPreview()" style="margin-top:16px">
+      ✨ Generează audio din acest script
+    </button>
+    <button class="btn-secondary" onclick="resetForm()">
+      🔄 Înapoi
+    </button>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+
+let currentJobId = null;
+let pollInterval = null;
+let lastScript = null;
+
+// ═══════════════════════════════════════════════════════
+// TOGGLE GROUPS
+// ═══════════════════════════════════════════════════════
+
+document.querySelectorAll('.toggle-group').forEach(group => {
+  group.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+});
+
+function getVal(groupId) {
+  const active = document.querySelector(`#${groupId} .toggle-btn.active`);
+  return active ? active.dataset.val : null;
+}
+
+function getFormData() {
+  return {
+    problem: document.getElementById('problem').value.trim(),
+    lang: getVal('langToggle'),
+    gender: getVal('genderToggle'),
+    duration: getVal('durationToggle'),
+    ambient: getVal('ambientToggle'),
+    name: document.getElementById('userName').value.trim() || undefined,
+    category: document.getElementById('category').value || undefined,
+    voiceId: document.getElementById('customVoiceId').value.trim() || undefined,
+    model: document.getElementById('modelSelect').value || undefined
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// GENERATE AUDIO
+// ═══════════════════════════════════════════════════════
+
+async function startGeneration() {
+  const data = getFormData();
+  if (!data.problem || data.problem.length < 5) {
+    showError('Scrie tema meditației (minim 5 caractere).');
+    return;
+  }
+
+  hideError();
+  document.getElementById('formCard').style.display = 'none';
+  document.getElementById('resultCard').classList.remove('visible');
+  document.getElementById('scriptOnlyCard').classList.remove('visible');
+  document.getElementById('progressCard').classList.add('visible');
+  resetProgress();
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    currentJobId = result.jobId;
+    startPolling();
+  } catch (err) {
+    showError(err.message);
+    document.getElementById('formCard').style.display = 'block';
+    document.getElementById('progressCard').classList.remove('visible');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// POLLING
+// ═══════════════════════════════════════════════════════
+
+function startPolling() {
+  pollInterval = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/status/${currentJobId}`);
+      const job = await res.json();
+
+      updateProgress(job);
+
+      if (job.status === 'done') {
+        clearInterval(pollInterval);
+        showResult(job.result);
+      } else if (job.status === 'error') {
+        clearInterval(pollInterval);
+        showError(job.error || 'Eroare necunoscută.');
+        document.getElementById('formCard').style.display = 'block';
+        document.getElementById('progressCard').classList.remove('visible');
+      }
+    } catch (err) {
+      // Network error, keep polling
+    }
+  }, 1500);
+}
+
+function updateProgress(job) {
+  const stepMap = {
+    script: { label: 'Se generează scriptul...', pct: 10, active: 'stepScript' },
+    tts: { label: `Sinteză vocală: ${job.progress}/${job.total}`, pct: 15 + (job.progress / Math.max(job.total, 1)) * 65, active: 'stepTTS' },
+    ambient: { label: 'Se generează track-ul ambient...', pct: 82, active: 'stepAmbient' },
+    assembly: { label: 'Se asamblează audio-ul final...', pct: 90, active: 'stepAssembly' },
+    cleanup: { label: 'Finalizare...', pct: 95, active: 'stepAssembly' },
+    done: { label: 'Gata!', pct: 100, active: null }
+  };
+
+  const step = stepMap[job.step] || stepMap.script;
+
+  document.getElementById('progressStep').textContent = step.label;
+  document.getElementById('progressBar').style.width = step.pct + '%';
+  document.getElementById('progressDetail').textContent = job.currentText || '';
+
+  // Update step indicators
+  const allSteps = ['stepScript', 'stepTTS', 'stepAmbient', 'stepAssembly'];
+  const activeIdx = allSteps.indexOf(step.active);
+
+  allSteps.forEach((s, i) => {
+    const el = document.getElementById(s);
+    el.classList.remove('active', 'done');
+    if (i < activeIdx) el.classList.add('done');
+    else if (i === activeIdx) el.classList.add('active');
+  });
+}
+
+function resetProgress() {
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('progressStep').textContent = 'Se pornește...';
+  document.getElementById('progressDetail').textContent = '';
+  ['stepScript', 'stepTTS', 'stepAmbient', 'stepAssembly'].forEach(s => {
+    document.getElementById(s).classList.remove('active', 'done');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// RESULT
+// ═══════════════════════════════════════════════════════
+
+function showResult(result) {
+  document.getElementById('progressCard').classList.remove('visible');
+  document.getElementById('resultCard').classList.add('visible');
+
+  document.getElementById('resultTitle').textContent = '✅ ' + (result.script_title || 'Meditație generată!');
+  document.getElementById('statDuration').textContent = result.duration_minutes;
+  document.getElementById('statSize').textContent = result.size_mb;
+
+  const audioEl = document.getElementById('audioPlayer');
+  audioEl.src = result.download_url;
+
+  const dlBtn = document.getElementById('downloadBtn');
+  dlBtn.href = result.download_url;
+  dlBtn.download = result.filename || 'meditatie.mp3';
+
+  // Load script for preview
+  loadScript();
+}
+
+async function loadScript() {
+  try {
+    const res = await fetch(`/api/status/${currentJobId}`);
+    const job = await res.json();
+    // Script is saved in workDir, but we'll get it from the preview endpoint or job data
+  } catch { /* ignore */ }
+}
+
+// ═══════════════════════════════════════════════════════
+// SCRIPT PREVIEW
+// ═══════════════════════════════════════════════════════
+
+async function previewScript() {
+  const data = getFormData();
+  if (!data.problem || data.problem.length < 5) {
+    showError('Scrie tema meditației (minim 5 caractere).');
+    return;
+  }
+
+  hideError();
+  const btn = document.getElementById('previewBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Se generează scriptul...';
+
+  try {
+    const res = await fetch('/api/preview-script', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    if (result.error) throw new Error(result.error);
+
+    lastScript = result.script;
+    renderScriptPreview(result.script, 'scriptOnlyPreview');
+
+    document.getElementById('formCard').style.display = 'none';
+    document.getElementById('scriptOnlyCard').classList.add('visible');
+
+    // Count segments
+    const totalSeg = result.script.phases.reduce((s, p) => s + p.segments.length, 0);
+    document.getElementById('statSegments').textContent = totalSeg;
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📝 Previzualizează doar scriptul';
+  }
+}
+
+function renderScriptPreview(script, containerId) {
+  const container = document.getElementById(containerId);
+  const phaseLabels = {
+    preparation: '🌅 Pregătire',
+    induction: '🌀 Inducție',
+    deepening: '🌊 Aprofundare',
+    suggestions: '💎 Sugestii terapeutice',
+    ego_strengthening: '⭐ Ego-strengthening',
+    post_hypnotic: '🔗 Sugestii post-hipnotice',
+    reorientation: '☀️ Reorientare'
+  };
+
+  let html = `<div style="font-weight:600;color:var(--accent-gold);margin-bottom:12px">${script.title || 'Script meditație'}</div>`;
+
+  for (const phase of script.phases) {
+    html += `<div class="script-phase">${phaseLabels[phase.phase] || phase.phase}</div>`;
+    for (const seg of phase.segments) {
+      html += `<div class="script-segment">${escHtml(seg.text)}</div>`;
+      if (seg.pause_after_ms >= 4000) {
+        html += `<div class="script-pause">— pauză ${(seg.pause_after_ms / 1000).toFixed(0)}s —</div>`;
+      }
+    }
+  }
+
+  container.innerHTML = html;
+}
+
+function showScriptPreview() {
+  const el = document.getElementById('scriptPreview');
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    // Try to load script JSON if available
+    el.innerHTML = '<em>Scriptul se încarcă...</em>';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+async function generateFromPreview() {
+  // Use the already-generated script data to start audio generation
+  document.getElementById('scriptOnlyCard').classList.remove('visible');
+  startGeneration();
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+function hideError() {
+  document.getElementById('errorMsg').classList.remove('visible');
+}
+
+function resetForm() {
+  if (pollInterval) clearInterval(pollInterval);
+  currentJobId = null;
+  lastScript = null;
+
+  document.getElementById('formCard').style.display = 'block';
+  document.getElementById('progressCard').classList.remove('visible');
+  document.getElementById('resultCard').classList.remove('visible');
+  document.getElementById('scriptOnlyCard').classList.remove('visible');
+  hideError();
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
